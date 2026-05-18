@@ -1,5 +1,5 @@
-use sqlx::MySqlPool;
 use crate::{AppError, User};
+use sqlx::MySqlPool;
 
 pub async fn get_by_id(pool: &MySqlPool, id: i32) -> Result<User, AppError> {
     let row = sqlx::query_as::<_, (i32, String, String)>(

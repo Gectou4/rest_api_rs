@@ -1,6 +1,6 @@
+use crate::{AppError, AppState};
 use axum::extract::{Path, State};
 use axum::Json;
-use crate::{AppError, AppState};
 
 pub async fn get_user(
     State(state): State<AppState>,

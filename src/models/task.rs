@@ -1,6 +1,6 @@
+use crate::{AppError, Task, TaskStatus};
 use chrono::Local;
 use sqlx::MySqlPool;
-use crate::{AppError, Task, TaskStatus};
 
 pub async fn get_by_id(pool: &MySqlPool, id: i32) -> Result<Task, AppError> {
     let row = sqlx::query_as::<_, (i32, i32, String, String, String)>(
@@ -76,16 +76,14 @@ pub async fn update(
     let new_desc = description.unwrap_or(task.description);
     let new_status = status.unwrap_or(task.status);
 
-    sqlx::query(
-        "UPDATE task SET status = ?, title = ?, description = ? WHERE task_id = ?",
-    )
-    .bind(new_status as i32)
-    .bind(new_title)
-    .bind(new_desc)
-    .bind(id)
-    .execute(pool)
-    .await
-    .map_err(|_| AppError::UpdateTaskFailed)?;
+    sqlx::query("UPDATE task SET status = ?, title = ?, description = ? WHERE task_id = ?")
+        .bind(new_status as i32)
+        .bind(new_title)
+        .bind(new_desc)
+        .bind(id)
+        .execute(pool)
+        .await
+        .map_err(|_| AppError::UpdateTaskFailed)?;
 
     Ok(())
 }

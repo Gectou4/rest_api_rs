@@ -1,9 +1,9 @@
+use crate::{AppError, AppState, TaskStatus};
 use axum::extract::{Path, State};
+use axum::http::StatusCode;
 use axum::Form;
 use axum::Json;
-use axum::http::StatusCode;
 use std::collections::HashMap;
-use crate::{AppError, AppState, TaskStatus};
 
 pub async fn create_task(
     State(state): State<AppState>,
@@ -19,7 +19,10 @@ pub async fn create_task(
 
     let task = crate::models::task::create(&state.pool, title, &description, status).await?;
 
-    Ok((StatusCode::CREATED, Json(serde_json::to_value(task).unwrap())))
+    Ok((
+        StatusCode::CREATED,
+        Json(serde_json::to_value(task).unwrap()),
+    ))
 }
 
 pub async fn update_task(

@@ -1,6 +1,6 @@
+use crate::AppState;
 use axum::routing::{delete, get, post};
 use axum::Router;
-use crate::AppState;
 
 pub fn create_router(state: AppState) -> Router {
     Router::new()
@@ -10,14 +10,8 @@ pub fn create_router(state: AppState) -> Router {
             get(crate::controllers::user::get_user_tasks),
         )
         .route("/task", post(crate::controllers::task::create_task))
-        .route(
-            "/task/{id}",
-            post(crate::controllers::task::update_task),
-        )
-        .route(
-            "/task/{id}",
-            delete(crate::controllers::task::delete_task),
-        )
+        .route("/task/{id}", post(crate::controllers::task::update_task))
+        .route("/task/{id}", delete(crate::controllers::task::delete_task))
         .route(
             "/user/{id}/task/{task_id}",
             post(crate::controllers::task::add_task_to_user),

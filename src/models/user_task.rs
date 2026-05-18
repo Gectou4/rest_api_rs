@@ -1,6 +1,6 @@
+use crate::{AppError, Task, TaskStatus, UserTask};
 use chrono::Local;
 use sqlx::MySqlPool;
-use crate::{AppError, Task, TaskStatus, UserTask};
 
 pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: i32) -> Result<UserTask, AppError> {
     let rows = sqlx::query_as::<_, (i32, i32, String, String, String)>(

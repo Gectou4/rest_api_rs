@@ -116,9 +116,10 @@ impl axum::response::IntoResponse for AppError {
             | AppError::DeleteTaskFailed
             | AppError::AddTaskToUserFailed
             | AppError::DeleteTaskOfUserFailed
-            | AppError::Database(_) => {
-                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
-            }
+            | AppError::Database(_) => (
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                self.to_string(),
+            ),
         };
 
         (status, axum::Json(serde_json::json!(message))).into_response()

@@ -68,8 +68,29 @@ jobs:
           DATABASE_URL: mysql://root:root@127.0.0.1:3306/rest_api
         run: cargo test
 
+  integration-test:
+    needs: [test]
+    runs-on: ubuntu-latest
+    name: "Integration Tests (Docker)"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start services
+        run: docker compose up -d --build
+
+      - name: Run integration tests
+        run: docker compose run --rm test
+
+      - name: Show API logs on failure
+        if: failure()
+        run: docker compose logs api
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v
+
   quality-gate:
-    needs: [lint, fmt, test]
+    needs: [lint, fmt, test, integration-test]
     runs-on: ubuntu-latest
     name: "Quality Gate"
     if: always()
@@ -79,8 +100,9 @@ jobs:
           echo "Lint: ${{ needs.lint.result }}"
           echo "Fmt: ${{ needs.fmt.result }}"
           echo "Test: ${{ needs.test.result }}"
+          echo "Integration: ${{ needs.integration-test.result }}"
 
-          if [[ "${{ needs.lint.result }}" == "failure" || "${{ needs.fmt.result }}" == "failure" || "${{ needs.test.result }}" == "failure" ]]; then
+          if [[ "${{ needs.lint.result }}" == "failure" || "${{ needs.fmt.result }}" == "failure" || "${{ needs.test.result }}" == "failure" || "${{ needs.integration-test.result }}" == "failure" ]]; then
             echo "Quality gate FAILED"
             exit 1
           fi

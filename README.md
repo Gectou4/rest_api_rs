@@ -86,6 +86,61 @@ cargo fmt
 
 ---
 
+## Tests
+
+### Tests unitaires (Rust)
+
+Nécessitent une base MySQL locale.
+
+```bash
+cargo test
+```
+
+### Tests d'intégration (Docker)
+
+Lance l'API + MySQL + script de test curl dans des conteneurs isolés :
+
+```bash
+docker compose run --rm test
+```
+
+Le script teste **10 scénarios** :
+
+| # | Test | Vérification |
+|---|------|-------------|
+| 1 | `GET /user/1` | 200 + JSON avec `user_id`, `name`, `email` |
+| 2 | `GET /user/999` | 404 (not found) |
+| 3 | `GET /user/1/task` | 200 + JSON avec `user_id`, `tasks` |
+| 4 | `POST /task` | 201 + tâche créée avec `task_id` |
+| 5 | `POST /task/{id}` | 200 (mise à jour) |
+| 6 | `POST /user/1/task/{id}` | 200 (association) |
+| 7 | `GET /user/1/task` | tâche associée présente |
+| 8 | `DELETE /user/1/task/{id}` | 200 (désassociation) |
+| 9 | `DELETE /task/{id}` | 200 (suppression) |
+| 10 | `GET /task/{id}` | 404/405 (vérification suppression) |
+
+### Tests manuels (PowerShell)
+
+Si l'API tourne déjà en local :
+
+```powershell
+.\scripts\test.ps1
+```
+
+Ou avec une URL custom :
+
+```powershell
+.\scripts\test.ps1 -ApiUrl http://localhost:3000
+```
+
+### Tests manuels (bash)
+
+```bash
+API_URL=http://localhost:3000 bash scripts/test.sh
+```
+
+---
+
 ## Docker
 
 ### Lancer avec Docker Compose
@@ -95,6 +150,12 @@ docker compose up --build
 ```
 
 L'API est accessible sur `http://localhost:3000`.
+
+### Lancer les tests d'intégration
+
+```bash
+docker compose run --rm test
+```
 
 ### Variables d'environnement
 

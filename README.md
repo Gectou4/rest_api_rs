@@ -47,7 +47,7 @@ Les routes sont déclarées dans `src/routes/mod.rs` avec le router axum.
 
 ### Prérequis
 
-- Rust 1.85+
+- Rust stable (1.86+)
 - MySQL 8.0+
 
 ### Installation

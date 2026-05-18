@@ -3,21 +3,28 @@ use sqlx::MySqlPool;
 use crate::{AppError, Task, TaskStatus};
 
 pub async fn get_by_id(pool: &MySqlPool, id: i32) -> Result<Task, AppError> {
-    let row = sqlx::query_as::<_, (i32, i32, String, String, chrono::NaiveDateTime)>(
-        "SELECT task_id, status, title, description, creation_date FROM task WHERE task_id = ?",
+    let row = sqlx::query_as::<_, (i32, i32, String, String, String)>(
+        "SELECT task_id, status, title, description, DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as creation_date FROM task WHERE task_id = ?",
     )
     .bind(id)
     .fetch_optional(pool)
     .await?;
 
     match row {
-        Some((task_id, status, title, description, creation_date)) => Ok(Task {
-            task_id,
-            status: TaskStatus::from_i8(status as i8),
-            title,
-            description,
-            creation_date: creation_date.and_local_timezone(Local).single().unwrap(),
-        }),
+        Some((task_id, status, title, description, creation_date)) => {
+            let dt = chrono::NaiveDateTime::parse_from_str(&creation_date, "%Y-%m-%d %H:%M:%S")
+                .map_err(|_| AppError::CreateTaskFailed)?
+                .and_local_timezone(Local)
+                .single()
+                .ok_or(AppError::CreateTaskFailed)?;
+            Ok(Task {
+                task_id,
+                status: TaskStatus::from_i8(status as i8),
+                title,
+                description,
+                creation_date: dt,
+            })
+        }
         None => Err(AppError::TaskNotFound(id)),
     }
 }
@@ -29,6 +36,7 @@ pub async fn create(
     status: TaskStatus,
 ) -> Result<Task, AppError> {
     let creation_date = chrono::Local::now();
+    let date_str = creation_date.format("%Y-%m-%d %H:%M:%S").to_string();
 
     let result = sqlx::query(
         "INSERT INTO task (status, title, description, creation_date) VALUES (?, ?, ?, ?)",
@@ -36,7 +44,7 @@ pub async fn create(
     .bind(status as i32)
     .bind(title)
     .bind(description)
-    .bind(creation_date.format("%Y-%m-%d %H:%M:%S").to_string())
+    .bind(&date_str)
     .execute(pool)
     .await;
 
@@ -95,20 +103,27 @@ pub async fn delete(pool: &MySqlPool, id: i32) -> Result<(), AppError> {
 }
 
 pub async fn get_all(pool: &MySqlPool) -> Result<Vec<Task>, AppError> {
-    let rows = sqlx::query_as::<_, (i32, i32, String, String, chrono::NaiveDateTime)>(
-        "SELECT task_id, status, title, description, creation_date FROM task",
+    let rows = sqlx::query_as::<_, (i32, i32, String, String, String)>(
+        "SELECT task_id, status, title, description, DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as creation_date FROM task",
     )
     .fetch_all(pool)
     .await?;
 
     let tasks = rows
         .into_iter()
-        .map(|(task_id, status, title, description, creation_date)| Task {
-            task_id,
-            status: TaskStatus::from_i8(status as i8),
-            title,
-            description,
-            creation_date: creation_date.and_local_timezone(Local).single().unwrap(),
+        .map(|(task_id, status, title, description, creation_date)| {
+            let dt = chrono::NaiveDateTime::parse_from_str(&creation_date, "%Y-%m-%d %H:%M:%S")
+                .unwrap()
+                .and_local_timezone(Local)
+                .single()
+                .unwrap();
+            Task {
+                task_id,
+                status: TaskStatus::from_i8(status as i8),
+                title,
+                description,
+                creation_date: dt,
+            }
         })
         .collect();
 

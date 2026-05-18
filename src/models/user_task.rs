@@ -3,9 +3,9 @@ use sqlx::MySqlPool;
 use crate::{AppError, Task, TaskStatus, UserTask};
 
 pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: i32) -> Result<UserTask, AppError> {
-    let rows = sqlx::query_as::<_, (i32, i32, String, String, chrono::NaiveDateTime)>(
+    let rows = sqlx::query_as::<_, (i32, i32, String, String, String)>(
         r#"
-        SELECT t.task_id, t.status, t.title, t.description, t.creation_date
+        SELECT t.task_id, t.status, t.title, t.description, DATE_FORMAT(t.creation_date, '%Y-%m-%d %H:%i:%s') as creation_date
         FROM task t
         INNER JOIN user_task ut ON t.task_id = ut.task_id
         WHERE ut.user_id = ?
@@ -17,12 +17,17 @@ pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: i32) -> Result<UserTas
 
     let mut task_map = std::collections::HashMap::new();
     for (task_id, status, title, description, creation_date) in rows {
+        let dt = chrono::NaiveDateTime::parse_from_str(&creation_date, "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .and_local_timezone(Local)
+            .single()
+            .unwrap();
         let task = Task {
             task_id,
             status: TaskStatus::from_i8(status as i8),
             title,
             description,
-            creation_date: creation_date.and_local_timezone(Local).single().unwrap(),
+            creation_date: dt,
         };
         task_map.insert(task.task_id, task);
     }

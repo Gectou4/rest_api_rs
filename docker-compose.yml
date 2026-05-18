@@ -12,8 +12,8 @@ services:
       test: ["CMD", "curl", "-sf", "http://localhost:3000/user/1"]
       interval: 5s
       timeout: 3s
-      retries: 10
-      start_period: 10s
+      retries: 15
+      start_period: 30s
     restart: unless-stopped
 
   db:

@@ -1,9 +1,14 @@
 use crate::AppState;
 use axum::routing::{delete, get, post};
-use axum::Router;
+use axum::{Json, Router};
+
+async fn health() -> Json<&'static str> {
+    Json("ok")
+}
 
 pub fn create_router(state: AppState) -> Router {
     Router::new()
+        .route("/health", get(health))
         .route("/user/{id}", get(crate::controllers::user::get_user))
         .route(
             "/user/{id}/task",

@@ -37,7 +37,7 @@ services:
       API_URL: http://api:3000
     volumes:
       - ./scripts/test.sh:/test.sh:ro
-    entrypoint: ["/bin/sh", "-c", "sleep 5 && chmod +x /test.sh && /test.sh"]
+    entrypoint: ["/bin/sh", "-c", "sleep 5 && sh /test.sh"]
 
 volumes:
   db_data:

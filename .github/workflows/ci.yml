@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: "Lint (clippy)"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy -- -D warnings
+
+  fmt:
+    runs-on: ubuntu-latest
+    name: "Format (rustfmt)"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --check
+
+  test:
+    needs: [lint, fmt]
+    runs-on: ubuntu-latest
+    name: "Tests"
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: rest_api
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root --password=root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Initialize database
+        run: |
+          mysql -h127.0.0.1 -uroot -proot rest_api < share/sql/init.sql
+
+      - name: Run tests
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/rest_api
+        run: cargo test
+
+  quality-gate:
+    needs: [lint, fmt, test]
+    runs-on: ubuntu-latest
+    name: "Quality Gate"
+    if: always()
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Fmt: ${{ needs.fmt.result }}"
+          echo "Test: ${{ needs.test.result }}"
+
+          if [[ "${{ needs.lint.result }}" == "failure" || "${{ needs.fmt.result }}" == "failure" || "${{ needs.test.result }}" == "failure" ]]; then
+            echo "Quality gate FAILED"
+            exit 1
+          fi
+
+          echo "Quality gate PASSED"

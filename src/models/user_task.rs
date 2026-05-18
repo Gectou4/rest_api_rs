@@ -2,8 +2,8 @@ use crate::{AppError, Task, TaskStatus, UserTask};
 use chrono::Local;
 use sqlx::MySqlPool;
 
-pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: i32) -> Result<UserTask, AppError> {
-    let rows = sqlx::query_as::<_, (i32, i32, String, String, String)>(
+pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: u32) -> Result<UserTask, AppError> {
+    let rows = sqlx::query_as::<_, (u32, i32, String, String, String)>(
         r#"
         SELECT t.task_id, t.status, t.title, t.description, DATE_FORMAT(t.creation_date, '%Y-%m-%d %H:%i:%s') as creation_date
         FROM task t
@@ -40,8 +40,8 @@ pub async fn get_tasks_by_user(pool: &MySqlPool, user_id: i32) -> Result<UserTas
 
 pub async fn add_task_to_user(
     pool: &MySqlPool,
-    user_id: i32,
-    task_id: i32,
+    user_id: u32,
+    task_id: u32,
 ) -> Result<(), AppError> {
     sqlx::query("INSERT INTO user_task (user_id, task_id) VALUES (?, ?)")
         .bind(user_id)
@@ -55,8 +55,8 @@ pub async fn add_task_to_user(
 
 pub async fn remove_task_from_user(
     pool: &MySqlPool,
-    user_id: i32,
-    task_id: i32,
+    user_id: u32,
+    task_id: u32,
 ) -> Result<(), AppError> {
     sqlx::query("DELETE FROM user_task WHERE user_id = ? AND task_id = ?")
         .bind(user_id)

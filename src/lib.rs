@@ -9,14 +9,14 @@ pub mod routes;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
-    pub user_id: i32,
+    pub user_id: u32,
     pub name: String,
     pub email: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Task {
-    pub task_id: i32,
+    pub task_id: u32,
     pub status: TaskStatus,
     pub title: String,
     pub description: String,
@@ -66,8 +66,8 @@ impl TaskStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserTask {
-    pub user_id: i32,
-    pub tasks: std::collections::HashMap<i32, Task>,
+    pub user_id: u32,
+    pub tasks: std::collections::HashMap<u32, Task>,
 }
 
 #[derive(Clone)]
@@ -78,9 +78,9 @@ pub struct AppState {
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("User [{0}] not exists")]
-    UserNotFound(i32),
+    UserNotFound(u32),
     #[error("Task [{0}] not exists")]
-    TaskNotFound(i32),
+    TaskNotFound(u32),
     #[error("Title is required")]
     TitleRequired,
     #[error("Id of task to edit is required")]

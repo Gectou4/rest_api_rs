@@ -27,7 +27,7 @@ pub async fn create_task(
 
 pub async fn update_task(
     State(state): State<AppState>,
-    Path(id): Path<i32>,
+    Path(id): Path<u32>,
     Form(params): Form<HashMap<String, String>>,
 ) -> Result<Json<i32>, AppError> {
     let title = params.get("title").cloned();
@@ -44,7 +44,7 @@ pub async fn update_task(
 
 pub async fn delete_task(
     State(state): State<AppState>,
-    Path(id): Path<i32>,
+    Path(id): Path<u32>,
 ) -> Result<Json<i32>, AppError> {
     crate::models::task::delete(&state.pool, id).await?;
     Ok(Json(1))
@@ -52,7 +52,7 @@ pub async fn delete_task(
 
 pub async fn add_task_to_user(
     State(state): State<AppState>,
-    Path((user_id, task_id)): Path<(i32, i32)>,
+    Path((user_id, task_id)): Path<(u32, u32)>,
 ) -> Result<Json<i32>, AppError> {
     crate::models::user::get_by_id(&state.pool, user_id).await?;
     crate::models::task::get_by_id(&state.pool, task_id).await?;
@@ -64,7 +64,7 @@ pub async fn add_task_to_user(
 
 pub async fn remove_task_from_user(
     State(state): State<AppState>,
-    Path((user_id, task_id)): Path<(i32, i32)>,
+    Path((user_id, task_id)): Path<(u32, u32)>,
 ) -> Result<Json<i32>, AppError> {
     crate::models::user::get_by_id(&state.pool, user_id).await?;
     crate::models::user_task::remove_task_from_user(&state.pool, user_id, task_id).await?;

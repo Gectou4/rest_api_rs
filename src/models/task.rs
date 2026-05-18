@@ -2,8 +2,8 @@ use crate::{AppError, Task, TaskStatus};
 use chrono::Local;
 use sqlx::MySqlPool;
 
-pub async fn get_by_id(pool: &MySqlPool, id: i32) -> Result<Task, AppError> {
-    let row = sqlx::query_as::<_, (i32, i32, String, String, String)>(
+pub async fn get_by_id(pool: &MySqlPool, id: u32) -> Result<Task, AppError> {
+    let row = sqlx::query_as::<_, (u32, i32, String, String, String)>(
         "SELECT task_id, status, title, description, DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as creation_date FROM task WHERE task_id = ?",
     )
     .bind(id)
@@ -50,7 +50,7 @@ pub async fn create(
 
     match result {
         Ok(res) => {
-            let task_id = res.last_insert_id() as i32;
+            let task_id = res.last_insert_id() as u32;
             Ok(Task {
                 task_id,
                 status,
@@ -65,7 +65,7 @@ pub async fn create(
 
 pub async fn update(
     pool: &MySqlPool,
-    id: i32,
+    id: u32,
     title: Option<String>,
     description: Option<String>,
     status: Option<TaskStatus>,
@@ -88,7 +88,7 @@ pub async fn update(
     Ok(())
 }
 
-pub async fn delete(pool: &MySqlPool, id: i32) -> Result<(), AppError> {
+pub async fn delete(pool: &MySqlPool, id: u32) -> Result<(), AppError> {
     get_by_id(pool, id).await?;
 
     sqlx::query("DELETE FROM task WHERE task_id = ?")
@@ -101,7 +101,7 @@ pub async fn delete(pool: &MySqlPool, id: i32) -> Result<(), AppError> {
 }
 
 pub async fn get_all(pool: &MySqlPool) -> Result<Vec<Task>, AppError> {
-    let rows = sqlx::query_as::<_, (i32, i32, String, String, String)>(
+    let rows = sqlx::query_as::<_, (u32, i32, String, String, String)>(
         "SELECT task_id, status, title, description, DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as creation_date FROM task",
     )
     .fetch_all(pool)

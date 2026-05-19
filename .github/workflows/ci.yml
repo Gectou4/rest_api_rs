@@ -78,12 +78,25 @@ jobs:
       - name: Build and start services
         run: docker compose up -d --build
 
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/health >/dev/null 2>&1; then
+              echo "API is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API logs:"
+          docker compose logs api
+          exit 1
+
       - name: Run integration tests
         run: docker compose run --rm test
 
-      - name: Show API logs on failure
+      - name: Show logs on failure
         if: failure()
-        run: docker compose logs api
+        run: docker compose logs
 
       - name: Cleanup
         if: always()

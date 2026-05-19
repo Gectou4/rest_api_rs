@@ -11,9 +11,16 @@ async fn main() {
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "mysql://root:root@localhost:3306/rest_api".to_string());
 
-    let pool = create_pool(&database_url)
-        .await
-        .expect("Failed to create database pool");
+    println!("Connecting to database...");
+    let pool = loop {
+        match create_pool(&database_url).await {
+            Ok(p) => break p,
+            Err(e) => {
+                eprintln!("Database connection failed: {e}, retrying in 2s...");
+                tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+            }
+        }
+    };
 
     let state = AppState { pool };
 

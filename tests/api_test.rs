@@ -2,8 +2,8 @@ use g4api::AppState;
 use sqlx::MySqlPool;
 
 async fn setup_test_pool() -> MySqlPool {
-    let database_url =
-        std::env::var("DATABASE_URL").unwrap_or_else(|_| "mysql://root:root@localhost:3306/rest_api".to_string());
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "mysql://root:root@localhost:3306/rest_api".to_string());
     sqlx::MySqlPool::connect(&database_url)
         .await
         .expect("Failed to connect to test database")
@@ -134,8 +134,7 @@ async fn test_add_task_to_user() {
     .await
     .expect("Failed to create test task");
 
-    let result =
-        g4api::models::user_task::add_task_to_user(&state.pool, 1, task.task_id).await;
+    let result = g4api::models::user_task::add_task_to_user(&state.pool, 1, task.task_id).await;
     assert!(result.is_ok());
 
     let user_tasks = g4api::models::user_task::get_tasks_by_user(&state.pool, 1)

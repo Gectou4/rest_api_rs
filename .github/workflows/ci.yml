@@ -92,7 +92,9 @@ jobs:
           exit 1
 
       - name: Run integration tests
-        run: docker compose run --rm test
+        run: bash scripts/test.sh
+        env:
+          API_URL: http://localhost:3000
 
       - name: Show logs on failure
         if: failure()

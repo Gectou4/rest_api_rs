@@ -15,14 +15,14 @@ section() { echo -e "\n${YELLOW}▸ $1${NC}"; }
 
 wait_for_api() {
     echo -e "${YELLOW}Waiting for API at $API_URL ...${NC}"
-    for i in $(seq 1 30); do
-        if curl -sf "$API_URL/user/1" >/dev/null 2>&1; then
+    for i in $(seq 1 90); do
+        if curl -sf "$API_URL/health" >/dev/null 2>&1; then
             echo -e "${GREEN}API is ready!${NC}\n"
             return
         fi
         sleep 1
     done
-    echo -e "${RED}API did not respond after 30s${NC}"
+    echo -e "${RED}API did not respond after 90s${NC}"
     exit 1
 }
 

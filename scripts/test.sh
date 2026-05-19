@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 API_URL="${API_URL:-http://localhost:3000}"
 RED='\033[0;31m'

@@ -61,9 +61,10 @@ wait_for_api
 # 1. GET /user/1
 # ──────────────────────────────────────────────
 section "GET /user/1"
-resp=$(curl -sf -w "\n%{http_code}" "$API_URL/user/1")
+resp=$(curl -s -w "\n%{http_code}" "$API_URL/user/1")
 status=$(echo "$resp" | tail -1)
 body=$(echo "$resp" | sed '$d')
+echo -e "  Response: $body"
 assert_status 200 "$status" "GET /user/1"
 assert_json_key "$body" "user_id" "response has user_id"
 assert_json_key "$body" "name" "response has name"
@@ -74,14 +75,14 @@ assert_json_value "$body" "user_id" "1" "user_id equals 1"
 # 2. GET /user/999 (not found)
 # ──────────────────────────────────────────────
 section "GET /user/999 (not found)"
-status=$(curl -sf -o /dev/null -w "%{http_code}" "$API_URL/user/999" || curl -s -o /dev/null -w "%{http_code}" "$API_URL/user/999")
+status=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/user/999")
 assert_status 404 "$status" "GET /user/999 returns 404"
 
 # ──────────────────────────────────────────────
 # 3. GET /user/1/task
 # ──────────────────────────────────────────────
 section "GET /user/1/task"
-resp=$(curl -sf -w "\n%{http_code}" "$API_URL/user/1/task")
+resp=$(curl -s -w "\n%{http_code}" "$API_URL/user/1/task")
 status=$(echo "$resp" | tail -1)
 body=$(echo "$resp" | sed '$d')
 assert_status 200 "$status" "GET /user/1/task"
@@ -92,7 +93,7 @@ assert_json_key "$body" "tasks" "response has tasks"
 # 4. POST /task (create)
 # ──────────────────────────────────────────────
 section "POST /task (create)"
-resp=$(curl -sf -w "\n%{http_code}" \
+resp=$(curl -s -w "\n%{http_code}" \
     -X POST "$API_URL/task" \
     -d "title=Test task&description=Created by test script&status=1")
 status=$(echo "$resp" | tail -1)
@@ -109,7 +110,7 @@ echo -e "  ${YELLOW}Created task_id=$TASK_ID${NC}"
 # 5. POST /task/{id} (update)
 # ──────────────────────────────────────────────
 section "POST /task/$TASK_ID (update)"
-status=$(curl -sf -o /dev/null -w "%{http_code}" \
+status=$(curl -s -o /dev/null -w "%{http_code}" \
     -X POST "$API_URL/task/$TASK_ID" \
     -d "title=Updated title&description=Updated description&status=2")
 assert_status 200 "$status" "POST /task/$TASK_ID returns 200"
@@ -118,7 +119,7 @@ assert_status 200 "$status" "POST /task/$TASK_ID returns 200"
 # 6. POST /user/1/task/{taskId} (associate)
 # ──────────────────────────────────────────────
 section "POST /user/1/task/$TASK_ID (associate)"
-status=$(curl -sf -o /dev/null -w "%{http_code}" \
+status=$(curl -s -o /dev/null -w "%{http_code}" \
     -X POST "$API_URL/user/1/task/$TASK_ID")
 assert_status 200 "$status" "POST /user/1/task/$TASK_ID returns 200"
 
@@ -126,7 +127,7 @@ assert_status 200 "$status" "POST /user/1/task/$TASK_ID returns 200"
 # 7. GET /user/1/task (verify association)
 # ──────────────────────────────────────────────
 section "GET /user/1/task (verify association)"
-resp=$(curl -sf "$API_URL/user/1/task")
+resp=$(curl -s "$API_URL/user/1/task")
 if echo "$resp" | grep -q "\"$TASK_ID\""; then
     pass "task $TASK_ID found in user tasks"
 else
@@ -137,7 +138,7 @@ fi
 # 8. DELETE /user/1/task/{taskId} (remove association)
 # ──────────────────────────────────────────────
 section "DELETE /user/1/task/$TASK_ID (remove association)"
-status=$(curl -sf -o /dev/null -w "%{http_code}" \
+status=$(curl -s -o /dev/null -w "%{http_code}" \
     -X DELETE "$API_URL/user/1/task/$TASK_ID")
 assert_status 200 "$status" "DELETE /user/1/task/$TASK_ID returns 200"
 
@@ -145,7 +146,7 @@ assert_status 200 "$status" "DELETE /user/1/task/$TASK_ID returns 200"
 # 9. DELETE /task/{id} (delete task)
 # ──────────────────────────────────────────────
 section "DELETE /task/$TASK_ID (delete task)"
-status=$(curl -sf -o /dev/null -w "%{http_code}" \
+status=$(curl -s -o /dev/null -w "%{http_code}" \
     -X DELETE "$API_URL/task/$TASK_ID")
 assert_status 200 "$status" "DELETE /task/$TASK_ID returns 200"
 
@@ -154,7 +155,6 @@ assert_status 200 "$status" "DELETE /task/$TASK_ID returns 200"
 # ──────────────────────────────────────────────
 section "GET /task/$TASK_ID (verify deletion)"
 status=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/task/$TASK_ID")
-# axum returns 405 for unmatched routes, or 404 depending on setup
 if [ "$status" = "404" ] || [ "$status" = "405" ]; then
     pass "task $TASK_ID no longer accessible (HTTP $status)"
 else

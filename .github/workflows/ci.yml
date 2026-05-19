@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Lint (clippy)"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Format (rustfmt)"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -51,7 +51,7 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     name: "Integration Tests (Docker)"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build and start services
         run: docker compose build --no-cache && docker compose up -d

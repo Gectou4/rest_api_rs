@@ -4,7 +4,7 @@ API REST légère en Rust, avec [axum](https://github.com/tokio-rs/axum), répon
 
 [![CI](https://github.com/Gectou4/rest_api_rs/actions/workflows/ci.yml/badge.svg)](https://github.com/Gectou4/rest_api_rs/actions/workflows/ci.yml)
 
-> **Part of the G4Api series.** The same small API (users, tasks and their N:N link) built in several stacks, to compare ecosystems: language, tooling, tests, static analysis and CI. Learning project, built in May 2026 with the help of an AI coding assistant. The PHP version is the reference.
+> **Part of the G4Api series.** The same small API (users, tasks and their N:N link) built in several stacks, to compare ecosystems: language, tooling, tests, static analysis and CI. Learning project. The PHP version is the reference: written by hand, then polished with AI-assisted review. The other stacks were ported from it in May 2026 with the help of an AI coding assistant.
 >
 > | Stack                | Repository                                                              |
 > | -------------------- | ----------------------------------------------------------------------- |

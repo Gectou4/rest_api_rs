@@ -1,5 +1,4 @@
 use crate::AppState;
-use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{delete, get, post};
@@ -9,14 +8,6 @@ async fn health() -> Json<&'static str> {
     Json("ok")
 }
 
-async fn test_route() -> impl IntoResponse {
-    (StatusCode::OK, "test route works")
-}
-
-async fn echo_id(Path(id): Path<String>) -> String {
-    format!("echo: {}", id)
-}
-
 async fn fallback(uri: axum::http::Uri) -> impl IntoResponse {
     (StatusCode::NOT_FOUND, format!("No route for {}", uri))
 }
@@ -24,8 +15,6 @@ async fn fallback(uri: axum::http::Uri) -> impl IntoResponse {
 pub fn create_router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health))
-        .route("/test", get(test_route))
-        .route("/echo/:id", get(echo_id))
         .route("/user/:id", get(crate::controllers::user::get_user))
         .route(
             "/user/:id/task",

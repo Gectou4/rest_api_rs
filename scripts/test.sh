@@ -57,26 +57,6 @@ assert_json_value() {
 wait_for_api
 
 # ──────────────────────────────────────────────
-# 0. GET /test (verify routing works)
-# ──────────────────────────────────────────────
-section "GET /test (routing check)"
-resp=$(curl -s -w "\n%{http_code}" "$API_URL/test")
-status=$(echo "$resp" | tail -1)
-body=$(echo "$resp" | sed '$d')
-echo -e "  Response: $body"
-assert_status 200 "$status" "GET /test"
-
-# ──────────────────────────────────────────────
-# 0b. GET /echo/42 (verify path params work)
-# ──────────────────────────────────────────────
-section "GET /echo/42 (path param check)"
-resp=$(curl -s -w "\n%{http_code}" "$API_URL/echo/42")
-status=$(echo "$resp" | tail -1)
-body=$(echo "$resp" | sed '$d')
-echo -e "  Response: $body"
-assert_status 200 "$status" "GET /echo/42"
-
-# ──────────────────────────────────────────────
 # 1. GET /user/1
 # ──────────────────────────────────────────────
 section "GET /user/1"
